@@ -1,52 +1,53 @@
-## A Template for a TypeScript Language Service Plugin
+# malong-i18n-tsserver
 
-<img src="./docs/screenshot.png">
+Jump to translation definition and show it on hover.
 
-This repo has two projects:
+## **Installation**
 
-- `/` is a TSServer Plugin 
-- `/example` is a TypeScript project which uses the root TSServer Plugin
+You can install the plugin globally or per project.
 
-The source files for your project
+### **📌 Project Installation**
 
-#### Get Started
+To install the plugin in your project, simply run:
 
-Get the plugin working and your TS to JS converted as you save:
-
-```ts
-git clone https://github.com/orta/TypeScript-TSServer-Plugin-Template
-cd TypeScript-TSServer-Plugin-Template
-
-# Install deps and run TypeScript
-npm i
-npx tsc --watch
+```sh
+npm install --save-dev xstate-tsserver
 ```
 
-Next, get the example project up and running, it will load your TSServer Plugin from the emitted JavaScript.
+### **📌 Global Installation**
 
-```
-# Set up the host app to work in
-cd example
-npm i
-cd ..
+You can also install the plugin globally by running:
 
-# Open one VS Code window to work on your plugin
-code .
-
-# Or to hook up a debugger, use this command
-# to have the TSServer wait till you attach:
-TSS_DEBUG_BRK=9559 code example
-
-# or use this to hook in later:
-TSS_DEBUG=9559 code example
+```sh
+npm install -g xstate-tsserver
 ```
 
-You can then use the launch options in this root project to connect your debugger to the running TSServer in the other window. To see changes, run the command palette "TypeScript: Reload Project" to restart the TSServer for the project.
+You will also need to add your global node_modules path to tsserver's plugin paths.
 
-Make sure that the TypeScript version on that project runs from your `node_modules` and not the version which is embedded in vscode. You can see the logs via the vscode command 'TypeScript: Open TS Server Logs." ( search for 'Loading tsserver-plugin' to see whether it loaded correctly. )
+For example, in VSCode, you can edit your **`settings.json`** to add the plugin path:
 
-### What Now?
+```json
+{
+  "typescript.tsserver.pluginPaths": ["path/to/global/node_modules"]
+}
+```
 
-This project has a `debugger` statement inside the completions which will trigger on completions, you can get that running and then you have proven the toolset works and get started building your plugin.
+💡 **Tip:** You can find your global node_modules path by running:
 
-You can read up the docs on [Language Service Plugins in the TypeScript repo wiki](https://github.com/microsoft/TypeScript/wiki/Writing-a-Language-Service-Plugin#overview-writing-a-simple-plugin).
+```sh
+npm root -g
+```
+
+### Plugin activation
+
+Modify your **`tsconfig.json`** to include the plugin:
+
+```json
+{
+  "compilerOptions": {
+    "plugins": [{ "name": "xstate-tsserver" }]
+  }
+}
+```
+
+Restart the TypeScript server (in VSCode by running **"TypeScript: Restart TS Server"** from the command palette)
