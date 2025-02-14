@@ -1,6 +1,5 @@
 import ts, { server } from "typescript/lib/tsserverlibrary";
 import { createParser } from "./treesitter";
-import path from "path";
 
 export function parseJsonFile(
   ts: typeof import("typescript/lib/tsserverlibrary"),
@@ -13,7 +12,6 @@ export function parseJsonFile(
   const parsedJson = ts.parseJsonText(jsonPath, fileContents);
   return parsedJson;
 }
-
 
 export function getResolvedJsonPath(info: server.PluginCreateInfo) {
   const { jsonFilePath } = info.config;
@@ -30,7 +28,7 @@ export function getResolvedJsonPath(info: server.PluginCreateInfo) {
     );
     return null;
   }
-  return path.join(baseUrl, jsonFilePath);
+  return `${baseUrl}/${jsonFilePath}`;
 }
 
 /**
