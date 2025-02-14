@@ -6,11 +6,12 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "tree-sitter": "^0.21.1",
     "tree-sitter-typescript": "^0.23.2",
-    "typescript": "^5"
+    "typescript": "^5.7.3"
   }
 }
