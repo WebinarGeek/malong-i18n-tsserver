@@ -20,8 +20,14 @@ export const translationQuery = `
 
 (call_expression
   function: (identifier) @function (#eq? @function "translate")
-  arguments: (arguments
+  arguments: (arguments [ 
     (string (string_fragment) @translationKey.name) @translationKey
+    (object
+      (pair
+        key: (property_identifier) @translationKey.id (#eq? @translationKey.id "id")
+        value: (string (string_fragment) @translationKey.name) @translationKey
+      )
+    )]
   )
 )
 `;
