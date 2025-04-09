@@ -13,11 +13,17 @@ export function parseJsonFile(
   return parsedJson;
 }
 
-export function getResolvedJsonPath(info: server.PluginCreateInfo) {
-  const { jsonFilePath } = info.config;
-  if (!jsonFilePath) {
+export function getResolvedJsonPaths(info: server.PluginCreateInfo) {
+  const { jsonFilePaths } = info.config;
+  if (!jsonFilePaths) {
     info.project.projectService.logger.info(
-      "Missing jsonFilePath in plugin config, skipping",
+      "Missing jsonFilePaths in plugin config, skipping",
+    );
+    return null;
+  }
+  if (!Array.isArray(jsonFilePaths)) {
+    info.project.projectService.logger.info(
+      "jsonFilePaths must be an array in plugin config, skipping",
     );
     return null;
   }
@@ -28,7 +34,13 @@ export function getResolvedJsonPath(info: server.PluginCreateInfo) {
     );
     return null;
   }
-  return `${baseUrl}/${jsonFilePath}`;
+  return jsonFilePaths.map((jsonFilePathConfig) => ({
+    ...jsonFilePathConfig,
+    path: `${baseUrl}/${jsonFilePathConfig.path}`,
+  })) as {
+    path: string;
+    namespace: string;
+  }[];
 }
 
 /**

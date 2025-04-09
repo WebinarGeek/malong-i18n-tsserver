@@ -1,5 +1,5 @@
 import { LanguageService, server } from "typescript/lib/tsserverlibrary";
-import { getFileRootNode, getResolvedJsonPath, parseJsonFile } from "./utils";
+import { getFileRootNode, getResolvedJsonPaths, parseJsonFile } from "./utils";
 import {
   getTranslationInJsonFile,
   getTranslationKeyAtPosition,
@@ -26,23 +26,17 @@ function init(modules: {
       proxy[k] = (...args: Array<{}>) => x.apply(info.languageService, args);
     }
 
-    const jsonPath = getResolvedJsonPath(info);
-    if (!jsonPath) {
+    const jsonPathConfig = getResolvedJsonPaths(info);
+    if (!jsonPathConfig) {
       return proxy;
     }
-    log("Using JSON path: " + jsonPath);
+    log("Using JSON paths: " + jsonPathConfig.map((p) => p.path).join(", "));
 
     proxy.getDefinitionAndBoundSpan = (fileName, position) => {
       const prior = info.languageService.getDefinitionAndBoundSpan(
         fileName,
         position,
       );
-
-      const parsedJson = parseJsonFile(ts, jsonPath);
-      if (!parsedJson) {
-        log("❌ Failed to parse json file");
-        return prior;
-      }
 
       const rootNode = getFileRootNode(info, fileName);
       if (!rootNode) return prior;
@@ -55,6 +49,21 @@ function init(modules: {
       const { node: translationNode, text: translationKey } =
         translationKeyCapture;
       log("✅ Found translationKey: " + translationKey);
+
+      const namespace = translationKey.split(".")[0];
+      const jsonPath = jsonPathConfig.find(
+        (p) => p.namespace === namespace,
+      )?.path;
+      if (!jsonPath) {
+        log("❌ Failed to find json path for namespace: " + namespace);
+        return prior;
+      }
+
+      const parsedJson = parseJsonFile(ts, jsonPath);
+      if (!parsedJson) {
+        log("❌ Failed to parse json file: " + jsonPath);
+        return prior;
+      }
 
       const translationFileCapture = getTranslationInJsonFile(
         parsedJson,
@@ -90,11 +99,6 @@ function init(modules: {
         fileName,
         position,
       );
-      const parsedJson = parseJsonFile(ts, jsonPath);
-      if (!parsedJson) {
-        log("❌ Failed to parse json file");
-        return prior;
-      }
 
       const rootNode = getFileRootNode(info, fileName);
       if (!rootNode) return prior;
@@ -106,6 +110,21 @@ function init(modules: {
       if (!translationKeyCapture) return prior;
       const { text: translationKey } = translationKeyCapture;
       log("✅ Found translationKey: " + translationKey);
+
+      const namespace = translationKey.split(".")[0];
+      const jsonPath = jsonPathConfig.find(
+        (p) => p.namespace === namespace,
+      )?.path;
+      if (!jsonPath) {
+        log("❌ Failed to find json path for namespace: " + namespace);
+        return prior;
+      }
+
+      const parsedJson = parseJsonFile(ts, jsonPath);
+      if (!parsedJson) {
+        log("❌ Failed to parse json file: " + jsonPath);
+        return prior;
+      }
 
       const translationFileCapture = getTranslationInJsonFile(
         parsedJson,
