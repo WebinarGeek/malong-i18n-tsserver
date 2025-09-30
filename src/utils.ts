@@ -87,57 +87,83 @@ export function findNodeByNestedKey(
   nestedKey: string,
 ): ts.Node | undefined {
   const keys = nestedKey.split(".");
-  return searchForNestedKey(root, keys);
+  
+  // For JSON files, we need to find the actual JSON object first
+  const jsonObject = findJsonObjectInAST(root);
+  if (!jsonObject) {
+    return undefined;
+  }
+  
+  return searchForNestedKeyInObject(jsonObject, keys);
 }
 
 /**
- * Recursively searches for a nested property given an array of keys.
- *
- * @param node - The current AST node.
- * @param keys - Array of key parts we are looking for.
- * @returns The PropertyAssignment node corresponding to the final key if found.
+ * Finds the actual JSON object literal in the AST
  */
-function searchForNestedKey(
-  node: ts.Node,
+function findJsonObjectInAST(node: ts.Node): ts.ObjectLiteralExpression | undefined {
+  if (ts.isObjectLiteralExpression(node)) {
+    return node;
+  }
+  
+  // Search through all child nodes recursively
+  let found: ts.ObjectLiteralExpression | undefined;
+  
+  function searchChildren(currentNode: ts.Node) {
+    if (found) return;
+    
+    if (ts.isObjectLiteralExpression(currentNode)) {
+      found = currentNode;
+      return;
+    }
+    
+    ts.forEachChild(currentNode, (child) => {
+      searchChildren(child);
+    });
+  }
+  
+  searchChildren(node);
+  
+  return found;
+}
+
+/**
+ * Searches for a nested key within a specific JSON object
+ */
+function searchForNestedKeyInObject(
+  obj: ts.ObjectLiteralExpression,
   keys: string[],
 ): ts.Node | undefined {
-  // If this node is an object literal, try to find a matching property.
-  if (ts.isObjectLiteralExpression(node)) {
-    for (const property of node.properties) {
-      if (ts.isPropertyAssignment(property)) {
-        let propertyName: string | undefined;
-        if (ts.isIdentifier(property.name)) {
-          propertyName = property.name.text;
-        } else if (ts.isStringLiteral(property.name)) {
-          propertyName = property.name.text;
-        }
-
-        if (propertyName === keys[0]) {
-          if (keys.length === 1) {
-            // Found the final property.
-            return property;
+  if (keys.length === 0) {
+    return undefined;
+  }
+  
+  const targetKey = keys[0];
+  
+  for (const property of obj.properties) {
+    if (ts.isPropertyAssignment(property)) {
+      let propertyName: string | undefined;
+      
+      if (ts.isIdentifier(property.name)) {
+        propertyName = property.name.text;
+      } else if (ts.isStringLiteral(property.name)) {
+        propertyName = property.name.text;
+      }
+      
+      if (propertyName === targetKey) {
+        if (keys.length === 1) {
+          return property;
+        } else {
+          if (ts.isObjectLiteralExpression(property.initializer)) {
+            return searchForNestedKeyInObject(property.initializer, keys.slice(1));
           } else {
-            // Continue searching within the initializer.
-            const nested = searchForNestedKey(
-              property.initializer,
-              keys.slice(1),
-            );
-            if (nested) {
-              return nested;
-            }
+            return undefined;
           }
         }
       }
     }
   }
-
-  // If not found here, search the child nodes recursively.
-  let found: ts.Node | undefined;
-  ts.forEachChild(node, (child) => {
-    if (found) return;
-    found = searchForNestedKey(child, keys);
-  });
-  return found;
+  
+  return undefined;
 }
 
 /**

@@ -147,5 +147,112 @@ describe("getTranslationInJsonFile", () => {
       
       expect(parsedJson).toBeNull();
     });
+
+    it("should handle deeply nested keys like admin.channel.sidebar.colors.themingBranding", () => {
+      // Create a test JSON that matches the structure from the log
+      const adminJson = `{
+        "channel": {
+          "sidebar": {
+            "colors": {
+              "themingBranding": "Theming & Branding"
+            }
+          }
+        }
+      }`;
+      
+      const parsedJson = parseJson(adminJson);
+      
+      // Test with the key WITHOUT the namespace (as it should be processed)
+      const result = getTranslationInJsonFile(parsedJson, "channel.sidebar.colors.themingBranding");
+      
+      expect(result?.translationText).toBe('"Theming & Branding"');
+    });
+
+    it("should work with the real JSON file structure - without namespace (recursive search)", () => {
+      const testJsonPath = path.join(__dirname, "..", "test.json");
+      const parsedJson = parseJsonFile(ts, testJsonPath);
+      expect(parsedJson).not.toBeNull();
+      
+      if (!parsedJson) return;
+
+      // The recursive search finds the key even under admin namespace
+      const result = getTranslationInJsonFile(parsedJson, "channel.sidebar.colors.themingBranding");
+      
+      expect(result).toEqual({
+        start: expect.any(Number),
+        length: expect.any(Number),
+        translationText: '"Theming & Custom Branding"',
+        proprtyNode: expect.any(Object)
+      });
+    });
+
+    it("should work with the real JSON file structure - with full namespace", () => {
+      const testJsonPath = path.join(__dirname, "..", "test.json");
+      const parsedJson = parseJsonFile(ts, testJsonPath);
+      expect(parsedJson).not.toBeNull();
+      
+      if (!parsedJson) return;
+
+      // Test the exact key from the log (with full admin namespace)
+      const result = getTranslationInJsonFile(parsedJson, "admin.channel.sidebar.colors.themingBranding");
+      
+      expect(result).toEqual({
+        start: expect.any(Number),
+        length: expect.any(Number),
+        translationText: '"Theming & Custom Branding"',
+        proprtyNode: expect.any(Object)
+      });
+    });
+
+    it("should work with admin-only JSON structure (proper namespace separation)", () => {
+      const testJsonPath = path.join(__dirname, "..", "test-admin-only.json");
+      const parsedJson = parseJsonFile(ts, testJsonPath);
+      expect(parsedJson).not.toBeNull();
+      
+      if (!parsedJson) return;
+
+      // Test with the key WITHOUT namespace (as it should work with namespace-specific files)
+      const result = getTranslationInJsonFile(parsedJson, "channel.sidebar.colors.themingBranding");
+      
+      expect(result).toEqual({
+        start: expect.any(Number),
+        length: expect.any(Number),
+        translationText: '"Theming & Custom Branding"',
+        proprtyNode: expect.any(Object)
+      });
+    });
+
+    it("should test the EXACT scenario from the log with admin.json", () => {
+      const adminJsonPath = path.join(__dirname, "..", "admin.json");
+      const parsedJson = parseJsonFile(ts, adminJsonPath);
+      expect(parsedJson).not.toBeNull();
+      
+      if (!parsedJson) return;
+
+      // Test BOTH scenarios to see which one works
+      console.log("Testing full key: admin.channel.sidebar.colors.themingBranding");
+      const fullKeyResult = getTranslationInJsonFile(parsedJson, "admin.channel.sidebar.colors.themingBranding");
+      
+      console.log("Testing key without namespace: channel.sidebar.colors.themingBranding");
+      const strippedKeyResult = getTranslationInJsonFile(parsedJson, "channel.sidebar.colors.themingBranding");
+      
+      // Both should work due to recursive search, but let's see which one actually finds it
+      expect(fullKeyResult).toEqual({
+        start: expect.any(Number),
+        length: expect.any(Number),
+        translationText: '"Theming & Custom Branding"',
+        proprtyNode: expect.any(Object)
+      });
+
+      expect(strippedKeyResult).toEqual({
+        start: expect.any(Number),
+        length: expect.any(Number),
+        translationText: '"Theming & Custom Branding"',
+        proprtyNode: expect.any(Object)
+      });
+
+      // They should return the same result
+      expect(fullKeyResult?.translationText).toBe(strippedKeyResult?.translationText);
+    });
   });
 });
