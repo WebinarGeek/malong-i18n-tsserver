@@ -180,6 +180,11 @@ export function getFileRootNode(
   const sourceFile = program?.getSourceFile(fileName);
   if (!sourceFile) return null;
   const parser = createParser();
-  const tree = parser.parse(sourceFile.getFullText());
-  return tree.rootNode;
+  try {
+    const tree = parser.parse(sourceFile.getFullText());
+    return tree.rootNode;
+  } catch (e) {
+    console.log("Could not parse file")
+    return null;
+  }
 }

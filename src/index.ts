@@ -15,6 +15,7 @@ function init(modules: {
       info.project.projectService.logger.info(message);
     }
     log("Loaded plugin: malong-i18n-tsserver");
+    log("DEBUGGGING")
 
     // Set up decorator object
     const proxy: LanguageService = Object.create(null);
@@ -69,7 +70,10 @@ function init(modules: {
         parsedJson,
         translationKey,
       );
-      if (!translationFileCapture) return prior;
+      if (!translationFileCapture) {
+        log("❌ Failed to find translation in json file: " + jsonPath);
+        return prior;
+      }
       const { start, length, translationText } = translationFileCapture;
       log("✅ Found translation: " + translationText);
 
@@ -130,7 +134,10 @@ function init(modules: {
         parsedJson,
         translationKey,
       );
-      if (!translationFileCapture) return prior;
+      if (!translationFileCapture) {
+        log("❌ Failed to find translation in json file: " + jsonPath);
+        return prior;
+      }
       const { start, length, translationText } = translationFileCapture;
       log("✅ Found translation: " + translationText);
 

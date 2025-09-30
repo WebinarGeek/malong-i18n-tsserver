@@ -28,7 +28,7 @@ export function getTranslationInJsonFile(
   const jsonTranslationTextNode = jsonTranslationNode.getChildren(parsedJson)[2];
   const start = jsonTranslationTextNode.getStart(parsedJson);
   const length = jsonTranslationTextNode.getEnd() - start;
-  const translationText = jsonTranslationTextNode.getText(parsedJson)
+  const translationText = jsonTranslationTextNode.getText(parsedJson);
 
   return {
     start,
