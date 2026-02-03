@@ -7,7 +7,7 @@ Jump to translation definition and show it on hover.
 To install the plugin in your project, simply run:
 
 ```sh
-npm install --save-dev malong-i18n-tsserver@WebinarGeek/malong-i18n-tsserver
+pnpm install --save-dev malong-i18n-tsserver@WebinarGeek/malong-i18n-tsserver
 ```
 
 ### Plugin activation
