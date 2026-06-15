@@ -1,6 +1,6 @@
 {
   "paths": ["src/**"],
-  "exclude": ["example"],
+  "exclude": ["example", "src/**/*.test.ts"],
   "compilerOptions": {
     "target": "es2017",                                     /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
     "module": "commonjs",                                /* Specify what module code is generated. */
