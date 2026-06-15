@@ -29,12 +29,17 @@ function getResolvedJsonPaths(info) {
         info.project.projectService.logger.info("jsonFilePaths must be an array in plugin config, skipping");
         return null;
     }
+    // `baseUrl` is the root that jsonFilePaths are resolved against. When it is
+    // not set explicitly (e.g. with `moduleResolution: bundler`), fall back to
+    // the project's config directory, which is what TS itself uses as the
+    // implicit base for relative paths.
     const { baseUrl } = info.project.getCompilerOptions();
-    if (!baseUrl) {
-        info.project.projectService.logger.info("Missing baseUrl in tsConfig, skipping");
+    const base = baseUrl !== null && baseUrl !== void 0 ? baseUrl : info.project.getCurrentDirectory();
+    if (!base) {
+        info.project.projectService.logger.info("Could not determine a base directory for jsonFilePaths, skipping");
         return null;
     }
-    return jsonFilePaths.map((jsonFilePathConfig) => (Object.assign(Object.assign({}, jsonFilePathConfig), { path: `${baseUrl}/${jsonFilePathConfig.path}` })));
+    return jsonFilePaths.map((jsonFilePathConfig) => (Object.assign(Object.assign({}, jsonFilePathConfig), { path: `${base}/${jsonFilePathConfig.path}` })));
 }
 /**
  * Recursively searches for a node by property name.
