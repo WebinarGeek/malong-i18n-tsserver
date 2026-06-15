@@ -1,5 +1,5 @@
 {
-  "name": "@webinar-geek/malong-i18n-tsserver",
+  "name": "malong-i18n-tsserver",
   "version": "0.0.3",
   "license": "MIT",
   "main": "./out",
@@ -14,6 +14,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "jest",
+    "prepare": "tsc",
     "prepublishOnly": "tsc"
   },
   "dependencies": {
