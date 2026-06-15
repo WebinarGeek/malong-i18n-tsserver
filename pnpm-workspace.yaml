@@ -1,0 +1,4 @@
+onlyBuiltDependencies:
+  - tree-sitter
+  - tree-sitter-typescript
+  - tree-sitter-javascript
