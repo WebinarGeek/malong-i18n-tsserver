@@ -1,11 +1,14 @@
 {
-  "name": "malong-i18n-tsserver",
+  "name": "@webinar-geek/malong-i18n-tsserver",
   "version": "0.0.3",
   "license": "MIT",
   "main": "./out",
   "files": [
     "out"
   ],
+  "publishConfig": {
+    "access": "restricted"
+  },
   "packageManager": "pnpm@10.25.0",
   "scripts": {
     "build": "tsc",
