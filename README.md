@@ -7,22 +7,37 @@ Jump to translation definition and show it on hover.
 Install directly from GitHub:
 
 ```sh
-pnpm add --save-dev malong-i18n-tsserver@github:WebinarGeek/malong-i18n-tsserver
+npm install --save-dev malong-i18n-tsserver@github:WebinarGeek/malong-i18n-tsserver
 ```
 
-> **Build allowlist (required).** This package builds itself at install time
-> (`prepare` → `tsc`) and depends on `tree-sitter` (a native module). pnpm
-> blocks build scripts for git-hosted and native dependencies by default, so
-> you must allow them in your project's `pnpm-workspace.yaml`:
+> **Install-script approvals.** This package builds itself at install time
+> (`prepare` → `tsc`) and depends on `tree-sitter` (a native module). If your
+> project uses npm's `strict-allow-scripts=true`, add these entries to
+> `allowScripts` in your project's `package.json`:
 >
-> ```yaml
-> onlyBuiltDependencies:
->   - malong-i18n-tsserver
->   - tree-sitter
->   - tree-sitter-typescript
+> ```json
+> "allowScripts": {
+>   "github:WebinarGeek/malong-i18n-tsserver#<resolved-commit>": true,
+>   "tree-sitter": true,
+>   "tree-sitter-javascript": true,
+>   "tree-sitter-typescript": true
+> }
 > ```
 >
-> Without this you'll see `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED` on install.
+> Replace `<resolved-commit>` with the commit recorded in `package-lock.json`.
+
+## Development
+
+The root `.npmrc` configures install-script approvals and a seven-day release cooldown.
+
+```sh
+npm ci
+npm run build
+npm test
+```
+
+Use `npm install` when adding or updating dependencies and commit the updated
+`package-lock.json`. Use `npm ci` for repeatable installs locally and in CI.
 
 ### Plugin activation
 
@@ -55,7 +70,7 @@ VSCode you can do this by running **"TypeScript: Select TypeScript Version"**
 
 > We currently install from GitHub. Publishing to the private
 > [`@webinar-geek`](https://www.npmjs.com/org/webinar-geek) npm org is an
-> alternative that removes the per-consumer build allowlist, at the cost of
+> alternative that removes the plugin's per-consumer build approval, at the cost of
 > setting up an npm token in CI. See the tracking issue before going this route.
 
 If/when we publish, the package is set up for it (`publishConfig.access`
@@ -65,6 +80,6 @@ is `restricted`, and `prepublishOnly` + the `files` allowlist ship a prebuilt
 
 ```sh
 npm login                 # must be a member of the @webinar-geek org
-pnpm version patch        # bump the version
-pnpm publish              # builds out/ and publishes privately
+npm version patch         # bump the version
+npm publish               # builds out/ and publishes privately
 ```
